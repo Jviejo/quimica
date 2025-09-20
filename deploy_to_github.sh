@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script para subir el proyecto a GitHub
+# Script para subir el proyecto a GitHub usando GitHub CLI
 # Proyecto: MSM Rincón - Recursos de Química
 
 echo "🚀 Iniciando despliegue del proyecto a GitHub..."
@@ -12,6 +12,26 @@ if ! command -v git &> /dev/null; then
     echo "❌ Error: Git no está instalado. Por favor instala Git primero."
     exit 1
 fi
+
+# Verificar si GitHub CLI está instalado
+if ! command -v gh &> /dev/null; then
+    echo "❌ Error: GitHub CLI (gh) no está instalado."
+    echo "📦 Instala GitHub CLI desde: https://cli.github.com/"
+    echo "   macOS: brew install gh"
+    echo "   Linux: apt install gh (o según tu distribución)"
+    echo "   Windows: winget install GitHub.cli"
+    exit 1
+fi
+
+# Verificar si el usuario está autenticado en GitHub CLI
+if ! gh auth status &> /dev/null; then
+    echo "🔐 No estás autenticado en GitHub CLI."
+    echo "🔑 Ejecuta: gh auth login"
+    echo "   Selecciona GitHub.com y sigue las instrucciones"
+    exit 1
+fi
+
+echo "✅ GitHub CLI está instalado y autenticado"
 
 # Verificar si estamos en un repositorio Git
 if [ ! -d ".git" ]; then
@@ -135,34 +155,63 @@ git commit -m "🎉 Commit inicial: Recursos educativos de química
 
 echo "✅ Commit realizado"
 
-# Verificar si el repositorio remoto ya existe
-if git remote get-url origin &> /dev/null; then
-    echo "✅ Repositorio remoto ya configurado"
-    echo "🔗 URL actual: $(git remote get-url origin)"
+# Crear repositorio en GitHub usando GitHub CLI
+echo "🌐 Creando repositorio en GitHub..."
+REPO_NAME="quimica"
+REPO_DESCRIPTION="Colección de recursos educativos interactivos para el aprendizaje de química"
+
+# Verificar si el repositorio ya existe
+if gh repo view "$REPO_NAME" &> /dev/null; then
+    echo "⚠️  El repositorio '$REPO_NAME' ya existe en GitHub"
+    echo "🔗 URL: https://github.com/$(gh api user --jq .login)/$REPO_NAME"
 else
-    echo "⚠️  No hay repositorio remoto configurado"
-    echo "📝 Para configurar el repositorio remoto, ejecuta:"
-    echo "   git remote add origin https://github.com/TU_USUARIO/quimica.git"
-    echo "   git branch -M main"
-    echo "   git push -u origin main"
-    echo ""
-    echo "🔧 O si prefieres usar SSH:"
-    echo "   git remote add origin git@github.com:TU_USUARIO/quimica.git"
-    echo "   git branch -M main"
-    echo "   git push -u origin main"
+    echo "📝 Creando repositorio '$REPO_NAME' en GitHub..."
+    gh repo create "$REPO_NAME" \
+        --public \
+        --description "$REPO_DESCRIPTION" \
+        --clone=false \
+        --push=false
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Repositorio creado exitosamente en GitHub"
+        echo "🔗 URL: https://github.com/$(gh api user --jq .login)/$REPO_NAME"
+    else
+        echo "❌ Error al crear el repositorio en GitHub"
+        exit 1
+    fi
 fi
 
-echo ""
-echo "🎯 Pasos siguientes:"
-echo "1. Ve a https://github.com y crea un nuevo repositorio llamado 'quimica'"
-echo "2. Copia la URL del repositorio (HTTPS o SSH)"
-echo "3. Ejecuta los siguientes comandos:"
-echo ""
-echo "   git remote add origin [URL_DE_TU_REPOSITORIO]"
-echo "   git branch -M main"
-echo "   git push -u origin main"
-echo ""
-echo "✨ ¡Tu proyecto estará disponible en GitHub!"
+# Configurar el repositorio remoto
+echo "🔗 Configurando repositorio remoto..."
+USERNAME=$(gh api user --jq .login)
+git remote add origin "https://github.com/$USERNAME/$REPO_NAME.git" 2>/dev/null || {
+    echo "⚠️  El repositorio remoto ya existe, actualizando URL..."
+    git remote set-url origin "https://github.com/$USERNAME/$REPO_NAME.git"
+}
+
+# Cambiar a rama main
+echo "🌿 Configurando rama main..."
+git branch -M main
+
+# Subir el código a GitHub
+echo "📤 Subiendo código a GitHub..."
+git push -u origin main
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "🎉 ¡Proyecto desplegado exitosamente!"
+    echo "🔗 URL del repositorio: https://github.com/$USERNAME/$REPO_NAME"
+    echo "🌐 GitHub Pages (si está habilitado): https://$USERNAME.github.io/$REPO_NAME"
+    echo ""
+    echo "💡 Para habilitar GitHub Pages:"
+    echo "   1. Ve a Settings > Pages en tu repositorio"
+    echo "   2. Selecciona 'Deploy from a branch'"
+    echo "   3. Elige 'main' branch y '/ (root)'"
+    echo "   4. Guarda los cambios"
+else
+    echo "❌ Error al subir el código a GitHub"
+    exit 1
+fi
 echo ""
 echo "📊 Resumen de archivos preparados:"
 git status --porcelain | wc -l | xargs echo "Archivos listos para subir:"
