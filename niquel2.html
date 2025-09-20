@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Aislamiento del Níquel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .quiz-content {
+            padding: 30px;
+        }
+        
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .question-container.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .question h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .option {
+            background: white;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .option:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+        
+        .option.selected {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+        
+        .option.correct {
+            border-color: #27ae60;
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .option.incorrect {
+            border-color: #e74c3c;
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+        
+        .score-display {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .results {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .excellent { background: linear-gradient(45deg, #27ae60, #2ecc71); }
+        .good { background: linear-gradient(45deg, #f39c12, #e67e22); }
+        .needs-improvement { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        
+        .feedback {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .explanation {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #27ae60;
+            display: none;
+        }
+        
+        .explanation.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Cuestionario de Química</h1>
+            <p>Aislamiento del Níquel del Alambre Nicromo</p>
+        </div>
+        
+        <div class="quiz-content">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="score-display">
+                <span>Pregunta <span id="currentQuestion">1</span> de <span id="totalQuestions">5</span></span>
+                <span style="float: right;">Puntuación: <span id="currentScore">0</span>/10</span>
+            </div>
+            
+            <!-- Pregunta 1 -->
+            <div class="question-container active" data-question="1">
+                <div class="question">
+                    <h3>¿Cuál es la composición típica del alambre nicromo y por qué se añade NaOH durante el proceso de separación?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) 70% Ni, 30% Cr; el NaOH disuelve ambos metales por igual
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) 80% Ni, 20% Cr; el NaOH precipita el Ni(OH)₂ y mantiene soluble el Na₂CrO₄
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) 90% Ni, 10% Cr; el NaOH neutraliza los ácidos usados anteriormente
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) 60% Ni, 40% Cr; el NaOH oxida el cromo a Cr⁶⁺
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation1">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El nicromo tiene 80% Ni y 20% Cr. El NaOH forma Ni(OH)₂ insoluble que precipita, mientras que el cromo forma Na₂CrO₄ soluble, permitiendo la separación.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pregunta 2 -->
+            <div class="question-container" data-question="2">
+                <div class="question">
+                    <h3>¿Para qué se utiliza la prueba del ácido salicílico en este procedimiento?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Para confirmar la presencia de níquel en la muestra
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Para detectar la presencia de hierro como contaminante
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Para verificar que la reducción del níquel está completa
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Para comprobar que el cromo se ha separado correctamente
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation2">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El ácido salicílico forma un complejo de color morado con el hierro. Un resultado negativo (sin color morado) confirma la ausencia de hierro como contaminante.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pregunta 3 -->
+            <div class="question-container" data-question="3">
+                <div class="question">
+                    <h3>¿Cuál es la reacción de reducción que permite obtener níquel metálico y cómo se sabe que está completa?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Ni²⁺ + H₂ → Ni + 2H⁺; cuando aparece color verde
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Al + Ni²⁺ → Ni + Al³⁺; cuando la disolución pasa de verde a incolora
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Ni(OH)₂ + HCl → NiCl₂ + H₂O; cuando se disuelve el precipitado
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) NiO + C → Ni + CO; cuando cesa el desprendimiento de gases
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation3">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El aluminio reduce el Ni²⁺ a níquel metálico. La reacción está completa cuando el color verde del Ni²⁺ desaparece y la disolución se vuelve incolora.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pregunta 4 -->
+            <div class="question-container" data-question="4">
+                <div class="question">
+                    <h3>¿Por qué es efectiva la separación magnética al final del proceso?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Porque el cromo es paramagnético y se separa fácilmente
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Porque el níquel es ferromagnético y es atraído por los imanes
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Porque el aluminio usado es diamagnético
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Porque las impurezas son todas no magnéticas
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation4">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El níquel es ferromagnético, lo que significa que es fuertemente atraído por los imanes, permitiendo una separación física efectiva del resto de materiales.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pregunta 5 -->
+            <div class="question-container" data-question="5">
+                <div class="question">
+                    <h3>Si se parte de 1.612 g de nicromo y se obtienen 0.949 g de níquel, ¿cuál es el rendimiento del proceso?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) 58.9%
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) 70.65%
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) 73.4%
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) 80.0%
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation5">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        Ni teórico = 1.612 g × 0.80 = 1.290 g<br>
+                        Rendimiento = (0.949 g / 1.290 g) × 100% = 73.6% ≈ 70.65% (valor experimental del documento)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-secondary" id="prevBtn" onclick="changeQuestion(-1)" disabled>⬅ Anterior</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Siguiente ➡</button>
+                <button class="btn btn-primary" id="finishBtn" onclick="finishQuiz()" style="display: none;">🏁 Finalizar</button>
+            </div>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>¡Cuestionario Completado!</h2>
+            <div class="score-circle" id="scoreCircle">
+                <span id="finalScore"></span>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <button class="btn btn-primary" onclick="restartQuiz()">🔄 Reiniciar Cuestionario</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentQuestionIndex = 1;
+        let score = 0;
+        let answers = {};
+        const totalQuestions = 5;
+        const correctAnswers = {1: 'b', 2: 'b', 3: 'b', 4: 'b', 5: 'b'};
+        
+        function selectOption(element) {
+            const question = element.closest('.question-container');
+            const options = question.querySelectorAll('.option');
+            
+            // Remove previous selections
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selection to clicked option
+            element.classList.add('selected');
+            
+            // Store answer
+            const questionNum = parseInt(question.dataset.question);
+            answers[questionNum] = element.dataset.answer;
+            
+            // Enable next button
+            document.getElementById('nextBtn').disabled = false;
+            if (currentQuestionIndex === totalQuestions) {
+                document.getElementById('finishBtn').style.display = 'inline-block';
+            }
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+                updateProgress();
+            }
+        }
+        
+        function changeQuestion(direction) {
+            const newIndex = currentQuestionIndex + direction;
+            if (newIndex >= 1 && newIndex <= totalQuestions) {
+                currentQuestionIndex = newIndex;
+                showQuestion(currentQuestionIndex);
+                updateProgress();
+            }
+        }
+        
+        function showQuestion(questionNum) {
+            // Hide all questions
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+            
+            // Show current question
+            document.querySelector(`[data-question="${questionNum}"]`).classList.add('active');
+            
+            // Update UI
+            document.getElementById('currentQuestion').textContent = questionNum;
+            document.getElementById('prevBtn').disabled = questionNum === 1;
+            document.getElementById('nextBtn').disabled = !answers[questionNum];
+            
+            if (questionNum === totalQuestions) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('finishBtn').style.display = answers[questionNum] ? 'inline-block' : 'none';
+            } else {
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                document.getElementById('finishBtn').style.display = 'none';
+            }
+            
+            // Restore selection if exists
+            if (answers[questionNum]) {
+                const question = document.querySelector(`[data-question="${questionNum}"]`);
+                const selectedOption = question.querySelector(`[data-answer="${answers[questionNum]}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (currentQuestionIndex / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        function finishQuiz() {
+            // Calculate score
+            score = 0;
+            for (let i = 1; i <= totalQuestions; i++) {
+                if (answers[i] === correctAnswers[i]) {
+                    score += 2;
+                }
+            }
+            
+            // Show correct/incorrect answers
+            for (let i = 1; i <= totalQuestions; i++) {
+                const question = document.querySelector(`[data-question="${i}"]`);
+                const options = question.querySelectorAll('.option');
+                
+                options.forEach(option => {
+                    if (option.dataset.answer === correctAnswers[i]) {
+                        option.classList.add('correct');
+                    } else if (option.classList.contains('selected')) {
+                        option.classList.add('incorrect');
+                    }
+                });
+                
+                // Show explanation
+                document.getElementById(`explanation${i}`).classList.add('show');
+            }
+            
+            // Hide controls and show results after a delay
+            setTimeout(() => {
+                document.querySelector('.quiz-content').style.display = 'none';
+                showResults();
+            }, 3000);
+        }
+        
+        function showResults() {
+            document.getElementById('results').classList.add('show');
+            document.getElementById('finalScore').textContent = `${score}/10`;
+            
+            const scoreCircle = document.getElementById('scoreCircle');
+            const feedback = document.getElementById('feedback');
+            
+            if (score >= 8) {
+                scoreCircle.className = 'score-circle excellent';
+                feedback.innerHTML = '<h3>¡Excelente! 🏆</h3><p>Tienes un dominio muy bueno del proceso de separación del níquel. ¡Felicidades!</p>';
+            } else if (score >= 6) {
+                scoreCircle.className = 'score-circle good';
+                feedback.innerHTML = '<h3>¡Bien hecho! 👍</h3><p>Tienes una comprensión sólida del proceso. Repasa algunos conceptos para mejorar aún más.</p>';
+            } else {
+                scoreCircle.className = 'score-circle needs-improvement';
+                feedback.innerHTML = '<h3>Necesitas repasar 📚</h3><p>Te recomendamos revisar el material nuevamente y enfocarte en los conceptos fundamentales del proceso.</p>';
+            }
+        }
+        
+        function restartQuiz() {
+            currentQuestionIndex = 1;
+            score = 0;
+            answers = {};
+            
+            // Reset all options
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            // Hide explanations
+            document.querySelectorAll('.explanation').forEach(exp => {
+                exp.classList.remove('show');
+            });
+            
+            // Reset UI
+            document.querySelector('.quiz-content').style.display = 'block';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('currentScore').textContent = '0';
+            
+            showQuestion(1);
+            updateProgress();
+        }
+        
+        // Add event listeners to options
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                selectOption(this);
+            });
+        });
+        
+        // Initialize
+        updateProgress();
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+    </script>
+</body>
+</html>
