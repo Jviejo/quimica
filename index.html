@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Índice de Páginas - MSM Rincón</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .page-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .page-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .page-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-left-color: #2980b9;
+        }
+        
+        .page-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .page-description {
+            color: #7f8c8d;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+        
+        .page-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .page-link:hover {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .icon {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        
+        .footer {
+            background: #ecf0f1;
+            padding: 20px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Índice de Páginas</h1>
+            <p>MSM Rincón - Colección de Recursos Educativos</p>
+        </div>
+        
+        <div class="content">
+            <div class="page-list">
+                <a href="niquel.html" class="page-link">
+                    <div class="page-item">
+                        <div class="page-title">
+                            <span class="icon">🧪</span>
+                            Cuestionario: Aislamiento del Níquel
+                        </div>
+                        <div class="page-description">
+                            Cuestionario interactivo sobre el proceso de separación del níquel del alambre nicromo. 
+                            Incluye 5 preguntas con explicaciones detalladas sobre composición, reacciones químicas y cálculos de rendimiento.
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 MSM Rincón - Recursos educativos de química</p>
+        </div>
+    </div>
+</body>
+</html>
