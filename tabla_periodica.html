@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Tabla Periódica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .quiz-content {
+            padding: 30px;
+        }
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #9b59b6;
+        }
+
+        .question h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: white;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .option:hover {
+            border-color: #9b59b6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.2);
+        }
+
+        .option.selected {
+            border-color: #9b59b6;
+            background: #f3e5f5;
+        }
+
+        .option.correct {
+            border-color: #27ae60;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .option.incorrect {
+            border-color: #e74c3c;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .results {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .excellent { background: linear-gradient(45deg, #27ae60, #2ecc71); }
+        .good { background: linear-gradient(45deg, #f39c12, #e67e22); }
+        .needs-improvement { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+
+        .feedback {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .explanation {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #27ae60;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="home-button" onclick="window.location.href='index.html'">🏠 Inicio</button>
+            <h1>🧬 Cuestionario de Química</h1>
+            <p>Tabla Periódica de los Elementos</p>
+        </div>
+
+        <div class="quiz-content">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="score-display">
+                <span>Pregunta <span id="currentQuestion">1</span> de <span id="totalQuestions">8</span></span>
+                <span style="float: right;">Puntuación: <span id="currentScore">0</span>/16</span>
+            </div>
+
+            <!-- Pregunta 1 -->
+            <div class="question-container active" data-question="1">
+                <div class="question">
+                    <h3>¿Quién es considerado el padre de la tabla periódica moderna?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Antoine Lavoisier
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Dmitri Mendeléyev
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) John Dalton
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Henry Moseley
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation1">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        Dmitri Mendeléyev publicó la primera versión ampliamente reconocida de la tabla periódica en 1869, ordenando los elementos por peso atómico y prediciendo elementos que aún no habían sido descubiertos.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pregunta 2 -->
+            <div class="question-container" data-question="2">
+                <div class="question">
+                    <h3>¿Cuál es la propiedad que define el orden actual de los elementos en la tabla periódica?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Peso atómico
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Número atómico
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Número de neutrones
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Masa molecular
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation2">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        La tabla periódica moderna se ordena por número atómico (número de protones), no por peso atómico como originalmente propuso Mendeléyev. Esta organización fue establecida por Henry Moseley en 1913.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pregunta 3 -->
+            <div class="question-container" data-question="3">
+                <div class="question">
+                    <h3>¿Cuántos grupos (columnas) tiene la tabla periódica?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) 16
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) 18
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) 20
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) 8
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation3">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        La tabla periódica moderna tiene 18 grupos (columnas verticales). Los elementos en el mismo grupo tienen propiedades químicas similares debido a que tienen el mismo número de electrones en su capa de valencia.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pregunta 4 -->
+            <div class="question-container" data-question="4">
+                <div class="question">
+                    <h3>¿Cuál de los siguientes elementos es un gas noble?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Cloro (Cl)
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Argón (Ar)
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Azufre (S)
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Fósforo (P)
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation4">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El argón (Ar) es un gas noble del grupo 18. Los gases nobles son elementos muy estables debido a que tienen su capa de valencia completa, lo que los hace químicamente inertes en condiciones normales.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pregunta 5 -->
+            <div class="question-container" data-question="5">
+                <div class="question">
+                    <h3>¿En qué grupo se encuentran los metales alcalinos?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Grupo 1
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Grupo 2
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Grupo 17
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Grupo 18
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation5">
+                        <strong>Respuesta correcta: a)</strong><br>
+                        Los metales alcalinos se encuentran en el grupo 1 (excepto el hidrógeno). Incluyen litio (Li), sodio (Na), potasio (K), rubidio (Rb), cesio (Cs) y francio (Fr). Son muy reactivos y tienen un electrón en su capa de valencia.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pregunta 6 -->
+            <div class="question-container" data-question="6">
+                <div class="question">
+                    <h3>¿Cuál es el elemento más abundante en el universo?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Oxígeno (O)
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Hidrógeno (H)
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Carbono (C)
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Helio (He)
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation6">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El hidrógeno (H) es el elemento más abundante en el universo, constituyendo aproximadamente el 75% de toda la materia normal. Es el elemento más simple, con un solo protón y un electrón.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pregunta 7 -->
+            <div class="question-container" data-question="7">
+                <div class="question">
+                    <h3>¿Qué tendencia ocurre con el radio atómico al moverse de izquierda a derecha en un período?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Aumenta
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Disminuye
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Se mantiene constante
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Varía aleatoriamente
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation7">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El radio atómico disminuye de izquierda a derecha en un período porque aumenta la carga nuclear (más protones), lo que atrae más fuertemente a los electrones hacia el núcleo, reduciendo el tamaño del átomo.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pregunta 8 -->
+            <div class="question-container" data-question="8">
+                <div class="question">
+                    <h3>¿Cuál de estos elementos es un halógeno?</h3>
+                    <div class="options">
+                        <div class="option" data-answer="a">
+                            a) Calcio (Ca)
+                        </div>
+                        <div class="option" data-answer="b">
+                            b) Flúor (F)
+                        </div>
+                        <div class="option" data-answer="c">
+                            c) Magnesio (Mg)
+                        </div>
+                        <div class="option" data-answer="d">
+                            d) Aluminio (Al)
+                        </div>
+                    </div>
+                    <div class="explanation" id="explanation8">
+                        <strong>Respuesta correcta: b)</strong><br>
+                        El flúor (F) es un halógeno del grupo 17. Los halógenos incluyen flúor, cloro, bromo, yodo y astato. Son muy reactivos y tienden a formar sales cuando se combinan con metales.
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prevBtn" onclick="changeQuestion(-1)" disabled>⬅ Anterior</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Siguiente ➡</button>
+                <button class="btn btn-primary" id="finishBtn" onclick="finishQuiz()" style="display: none;">🏁 Finalizar</button>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <h2>¡Cuestionario Completado!</h2>
+            <div class="score-circle" id="scoreCircle">
+                <span id="finalScore"></span>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <button class="btn btn-primary" onclick="restartQuiz()">🔄 Reiniciar Cuestionario</button>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'" style="margin-left: 10px;">🏠 Volver al Inicio</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 1;
+        let score = 0;
+        let answers = {};
+        const totalQuestions = 8;
+        const correctAnswers = {1: 'b', 2: 'b', 3: 'b', 4: 'b', 5: 'a', 6: 'b', 7: 'b', 8: 'b'};
+
+        function selectOption(element) {
+            const question = element.closest('.question-container');
+            const options = question.querySelectorAll('.option');
+
+            // Remove previous selections
+            options.forEach(opt => opt.classList.remove('selected'));
+
+            // Add selection to clicked option
+            element.classList.add('selected');
+
+            // Store answer
+            const questionNum = parseInt(question.dataset.question);
+            answers[questionNum] = element.dataset.answer;
+
+            // Enable next button
+            document.getElementById('nextBtn').disabled = false;
+            if (currentQuestionIndex === totalQuestions) {
+                document.getElementById('finishBtn').style.display = 'inline-block';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+                updateProgress();
+            }
+        }
+
+        function changeQuestion(direction) {
+            const newIndex = currentQuestionIndex + direction;
+            if (newIndex >= 1 && newIndex <= totalQuestions) {
+                currentQuestionIndex = newIndex;
+                showQuestion(currentQuestionIndex);
+                updateProgress();
+            }
+        }
+
+        function showQuestion(questionNum) {
+            // Hide all questions
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+
+            // Show current question
+            document.querySelector(`[data-question="${questionNum}"]`).classList.add('active');
+
+            // Update UI
+            document.getElementById('currentQuestion').textContent = questionNum;
+            document.getElementById('prevBtn').disabled = questionNum === 1;
+            document.getElementById('nextBtn').disabled = !answers[questionNum];
+
+            if (questionNum === totalQuestions) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('finishBtn').style.display = answers[questionNum] ? 'inline-block' : 'none';
+            } else {
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                document.getElementById('finishBtn').style.display = 'none';
+            }
+
+            // Restore selection if exists
+            if (answers[questionNum]) {
+                const question = document.querySelector(`[data-question="${questionNum}"]`);
+                const selectedOption = question.querySelector(`[data-answer="${answers[questionNum]}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestionIndex / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function finishQuiz() {
+            // Calculate score
+            score = 0;
+            for (let i = 1; i <= totalQuestions; i++) {
+                if (answers[i] === correctAnswers[i]) {
+                    score += 2;
+                }
+            }
+
+            // Show correct/incorrect answers
+            for (let i = 1; i <= totalQuestions; i++) {
+                const question = document.querySelector(`[data-question="${i}"]`);
+                const options = question.querySelectorAll('.option');
+
+                options.forEach(option => {
+                    if (option.dataset.answer === correctAnswers[i]) {
+                        option.classList.add('correct');
+                    } else if (option.classList.contains('selected')) {
+                        option.classList.add('incorrect');
+                    }
+                });
+
+                // Show explanation
+                document.getElementById(`explanation${i}`).classList.add('show');
+            }
+
+            // Hide controls and show results after a delay
+            setTimeout(() => {
+                document.querySelector('.quiz-content').style.display = 'none';
+                showResults();
+            }, 3000);
+        }
+
+        function showResults() {
+            document.getElementById('results').classList.add('show');
+            document.getElementById('finalScore').textContent = `${score}/16`;
+
+            const scoreCircle = document.getElementById('scoreCircle');
+            const feedback = document.getElementById('feedback');
+
+            if (score >= 14) {
+                scoreCircle.className = 'score-circle excellent';
+                feedback.innerHTML = '<h3>¡Excelente! 🏆</h3><p>Tienes un dominio excepcional de la tabla periódica. ¡Felicidades!</p>';
+            } else if (score >= 10) {
+                scoreCircle.className = 'score-circle good';
+                feedback.innerHTML = '<h3>¡Bien hecho! 👍</h3><p>Tienes una comprensión sólida de la tabla periódica. Sigue estudiando para mejorar aún más.</p>';
+            } else {
+                scoreCircle.className = 'score-circle needs-improvement';
+                feedback.innerHTML = '<h3>Necesitas repasar 📚</h3><p>Te recomendamos revisar los conceptos fundamentales de la tabla periódica y sus propiedades.</p>';
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 1;
+            score = 0;
+            answers = {};
+
+            // Reset all options
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            // Hide explanations
+            document.querySelectorAll('.explanation').forEach(exp => {
+                exp.classList.remove('show');
+            });
+
+            // Reset UI
+            document.querySelector('.quiz-content').style.display = 'block';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('currentScore').textContent = '0';
+
+            showQuestion(1);
+            updateProgress();
+        }
+
+        // Add event listeners to options
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                selectOption(this);
+            });
+        });
+
+        // Initialize
+        updateProgress();
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+    </script>
+</body>
+</html>
